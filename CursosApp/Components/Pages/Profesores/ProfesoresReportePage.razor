@@ -1,0 +1,32 @@
+﻿@page "/profesoresReporte"
+@inject NavigationManager navigation
+@rendermode InteractiveServer
+
+<h1>Reporte de Profesores</h1>
+
+<ProfesoresListado Datos="@ProfesoresList" MostrarTitulo="false"/>
+
+<AuthorizeView>
+    <Authorized>
+        <button @onclick="IrMaestro">Ir a maestro</button>
+    </Authorized>
+    <NotAuthorized>
+        <p>Registrese o ingrese al sistema para mas funcionalidad</p>
+        <button @onclick="Login">Login</button>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    private List<Profesor> ProfesoresList = new();
+
+    private void IrMaestro()
+    {
+        navigation.NavigateTo("profesor");
+    }
+
+    private void Login()
+    {
+        navigation.NavigateTo("Account/Login");
+    }
+}

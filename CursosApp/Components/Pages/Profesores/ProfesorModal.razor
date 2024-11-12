@@ -1,0 +1,75 @@
+﻿@rendermode InteractiveServer
+
+<!-- Modal -->
+<div class="modal @StatusClass" tabindex="-1" style="display:@StyleDisplay">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">@(Modificando ? "Modificando" : "Nuevo") profesor</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if (Data != null)
+                {
+                    <form>
+                        <div class="mb-3">
+                            <label for="recipient-dni" class="col-form-label">DNI:</label>
+                            <input type="text" class="form-control" id="recipient-dni" @bind="Data.DNI">
+                        </div>
+                        <div class="mb-3">
+                            <label for="message-nombre" class="col-form-label">Nombre:</label>
+                            <input type="text" class="form-control" id="message-nombre" @bind="Data.Nombre"></input>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message-apellido" class="col-form-label">Apellido:</label>
+                            <input type="text" class="form-control" id="message-apellido" @bind="Data.Apellido"></input>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message-fechanac" class="col-form-label">Fecha nacimiento:</label>
+                            <input type="date" class="form-control" id="message-fechanac" @bind="Data.FechaNacimiento"></input>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message-experiencia" class="col-form-label">Años experiencia:</label>
+                            <input type="number" class="form-control" id="message-experiencia" @bind="Data.AñosExperiencia"></input>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message-materia" class="col-form-label">Materia:</label>
+                            <input type="text" class="form-control" id="message-materia" @bind="Data.Materia"></input>
+                        </div>
+                    </form>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="Close">Cancelar</button>
+                <button type="button" class="btn btn-primary" @onclick="() => GuardarEventCallback.InvokeAsync()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public Profesor? Data { get; set; }
+    [Parameter]
+    public EventCallback GuardarEventCallback { get; set; }
+    [Parameter]
+    public bool Modificando { get; set; } = false;
+
+    private string StatusClass = "fade";
+    private string StyleDisplay = "none";
+
+    public void Open()
+    {
+        StatusClass = "show";
+        StyleDisplay = "block";
+        StateHasChanged();
+    }
+
+    public void Close()
+    {
+        StatusClass = "fade";
+        StyleDisplay = "none";
+        StateHasChanged();
+    }
+}

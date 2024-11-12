@@ -1,0 +1,71 @@
+﻿@if (MostrarTitulo)
+{
+    <h4>Listado de profesores</h4>
+}
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            @* <th>#</th> *@
+            <th>DNI</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Fecha nacimiento</th>
+            <th>Años experiencia</th>
+            <th>Materia</th>
+            @if (ColumnasAdicionales != null)
+            {
+                <th></th>
+            }
+            @if (MostrarBotones)
+            {
+                <th></th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Datos)
+        {
+            <tr>
+                <td>@item.DNI</td>
+                <td>@item.Nombre</td>
+                <td>@item.Apellido</td>
+                <td>@item.FechaNacimiento</td>
+                <td>@item.AñosExperiencia</td>
+                <td>@item.Materia</td>
+                @if (ColumnasAdicionales != null)
+                {
+                    <td>
+                        @ColumnasAdicionales
+                    </td>
+                }
+                @if (MostrarBotones)
+                {
+                    <td>
+                        <button type="button" class="btn btn-link" @onclick="() => ModificarEvent.InvokeAsync(item)">Modificar</button>
+                        <button type="button" class="btn btn-link" @onclick="() => EliminarEvent.InvokeAsync(item)">Eliminar</button>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p>Cantidad de profesores: @Datos.Count</p>
+
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public List<Profesor> Datos { get; set; }
+    [Parameter]
+    public bool MostrarTitulo { get; set; } = true;
+    [Parameter]
+    public bool MostrarBotones { get; set; } = false;
+    [Parameter]
+    public RenderFragment ColumnasAdicionales { get; set; } = null;
+    [Parameter]
+    public EventCallback<Profesor> ModificarEvent { get; set; }
+    [Parameter]
+    public EventCallback<Profesor> EliminarEvent { get; set; }
+}

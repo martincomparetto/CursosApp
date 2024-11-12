@@ -1,0 +1,14 @@
+﻿@page "/profesor"
+@inject NavigationManager navigation
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<h1>Profesor</h1>
+
+<ProfesorModal @ref="modal" Data="ProfesorModificando" GuardarEventCallback="Guardar" Modificando="EstamosModificando" />
+
+<button type="button" class="btn btn-primary" @onclick="NuevoProfesor">Nuevo</button>
+
+<ProfesoresListado Datos="@ProfesoresList" MostrarBotones="true" ModificarEvent="Modificar" EliminarEvent="Eliminar">
+</ProfesoresListado>
+
