@@ -35,6 +35,7 @@ builder.Services.AddIdentityCore<CursosAppUser>(options =>
         options.User.RequireUniqueEmail = true;
         options.Password.RequireNonAlphanumeric = true;
     })
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<CursosAppContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
@@ -60,5 +61,20 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.MapAdditionalIdentityEndpoints(); ;
+
+using (var scope = app.Services.CreateScope())
+{
+    string[] roles = ["Admin", "Profesor", "Alumno", "Director"];
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            IdentityRole roleRole = new IdentityRole(role);
+            await roleManager.CreateAsync(roleRole);
+        }
+    }
+}
 
 app.Run();

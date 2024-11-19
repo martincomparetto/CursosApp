@@ -14,6 +14,8 @@
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject RoleManager<IdentityRole> RolesManager
+@inject CursosAppContext context
 
 <PageTitle>Register</PageTitle>
 
@@ -47,6 +49,29 @@
                 <label for="confirm-password">Confirm Password</label>
                 <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
             </div>
+            <div class="form-floating mb-3">
+                <InputSelect class="form-control" @bind-Value="Input.Role" placeholder="Rol">
+                    @foreach (var item in rolesList)
+                    {
+                        <option value="@item.NormalizedName">@item.Name</option>
+                    }
+                </InputSelect>
+                <label for="rol">Rol</label>
+                <ValidationMessage For="() => Input.Role" class="text-danger" />
+            </div>
+            @if (profesoresList != null)
+            {
+                <div class="form-floating mb-3">
+                    <InputSelect class="form-control" @bind-Value="Input.ProfesorId" placeholder="Profesor">
+                        @foreach (var item in profesoresList)
+                        {
+                            <option value="@item.ID">@($"{item.Nombre} {item.Apellido}")</option>
+                        }
+                    </InputSelect>
+                    <label for="profesor">Profesor</label>
+                    <ValidationMessage For="() => Input.ProfesorId" class="text-danger" />
+                </div>
+            }
             <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </EditForm>
     </div>
@@ -70,6 +95,16 @@
 
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
+    private List<Profesor>? profesoresList;
+    private List<IdentityRole> rolesList;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        profesoresList = context.Profesores.ToList();
+        rolesList = RolesManager.Roles.ToList();
+    }
+
     public async Task RegisterUser(EditContext editContext)
     {
         var user = CreateUser();
@@ -77,6 +112,7 @@
         await UserStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
         var emailStore = GetEmailStore();
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+        user.Profesor = profesoresList?.FirstOrDefault(p => p.ID == Input.ProfesorId);
         var result = await UserManager.CreateAsync(user, Input.Password);
 
         if (!result.Succeeded)
@@ -84,6 +120,8 @@
             identityErrors = result.Errors;
             return;
         }
+
+        await UserManager.AddToRoleAsync(user, Input.Role);
 
         Logger.LogInformation("User created a new account with password.");
 
@@ -129,6 +167,11 @@
         return (IUserEmailStore<CursosAppUser>)UserStore;
     }
 
+    private void MostrarProfesor()
+    {
+        StateHasChanged();
+    }
+
     private sealed class InputModel
     {
         [Required]
@@ -150,5 +193,12 @@
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = "";
+
+        [Required]
+        [Display(Name = "Rol")]
+        public string Role { get; set; } = "";
+
+        [Display(Name = "Profesor")]
+        public Guid? ProfesorId { get; set; }
     }
 }

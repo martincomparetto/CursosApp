@@ -1,7 +1,7 @@
 ﻿@page "/profesor"
 @inject NavigationManager navigation
 @rendermode InteractiveServer
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin, Profesor")]
 
 <h1>Profesor</h1>
 
