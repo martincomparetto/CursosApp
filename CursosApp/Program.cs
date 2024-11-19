@@ -64,7 +64,7 @@ app.MapAdditionalIdentityEndpoints(); ;
 
 using (var scope = app.Services.CreateScope())
 {
-    string[] roles = ["Admin", "Profesor", "Alumno", "Director"];
+    string[] roles = ["Admin", "Profesor", "Alumno"];
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
     foreach (var role in roles)

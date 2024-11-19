@@ -1,0 +1,103 @@
+﻿@page "/cursosReporte"
+@rendermode InteractiveServer
+@inject CursosAppContext context
+
+<h3>Reporte de Cursos</h3>
+
+Nombre profesor
+<input type="text" @bind-value="filtroNombreProfesor" />
+<button @onclick="BuscarCursos">Buscar</button>
+
+@if (cursos == null)
+{
+    <h4>Presione Buscar para mostrar el reporte</h4>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>
+                    Nombre
+                </th>
+                <th>
+                    Cantidad Máxima de Alumnos
+                </th>
+                <th>
+                    Profesor
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in cursos)
+            {
+                <tr>
+                    <td>@item.Nombre</td>
+                    <td>@item.CantidadMaximaAlumnos</td>
+                    <td>@item.NombreProfesor</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    List<CursoReporteModel>? cursos;
+    string filtroNombreProfesor = "";
+
+    private void BuscarCursos()
+    {
+        if (filtroNombreProfesor != "")
+        {
+            cursos = context.Cursos.Include("ProfesorPrincipal")
+            .Where(c => c.ProfesorPrincipal.Nombre.Contains(filtroNombreProfesor) || c.ProfesorPrincipal.Apellido.Contains(filtroNombreProfesor))
+            .Select(c => new CursoReporteModel()
+                {
+                    Nombre = c.Nombre,
+                    CantidadMaximaAlumnos = c.CantidadMaximaAlumnos,
+                    NombreProfesor = $"{c.ProfesorPrincipal.Nombre} {c.ProfesorPrincipal.Apellido}"
+                }).ToList();
+        }
+        else
+        {
+            cursos = context.Cursos.Include("ProfesorPrincipal")
+            .Select(c => new CursoReporteModel()
+                {
+                    Nombre = c.Nombre,
+                    CantidadMaximaAlumnos = c.CantidadMaximaAlumnos,
+                    NombreProfesor = $"{c.ProfesorPrincipal.Nombre} {c.ProfesorPrincipal.Apellido}"
+                }).ToList();
+        }
+
+
+        // var comando = context.Cursos.Include("ProfesorPrincipal");
+        // if (filtroNombreProfesor != "")
+        // {
+        //     comando = comando.Where(c => c.ProfesorPrincipal.Nombre == filtroNombreProfesor || c.ProfesorPrincipal.Apellido == filtroNombreProfesor);
+        // }
+        // cursos = comando
+        // .Select(c => new CursoReporteModel()
+        //     {
+        //         Nombre = c.Nombre,
+        //         CantidadMaximaAlumnos = c.CantidadMaximaAlumnos,
+        //         NombreProfesor = $"{c.ProfesorPrincipal.Nombre} {c.ProfesorPrincipal.Apellido}"
+        //     }).ToList();
+
+
+        // cursos = (from c in context.Cursos.Include("ProfesorPrincipal")
+        //           select new CursoReporteModel()
+        //               {
+        //                   Nombre = c.Nombre,
+        //                   CantidadMaximaAlumnos = c.CantidadMaximaAlumnos,
+        //                   NombreProfesor = $"{c.ProfesorPrincipal.Nombre} {c.ProfesorPrincipal.Apellido}"
+        //               }).ToList();
+    }
+
+    private class CursoReporteModel
+    {
+        public string Nombre { get; set; } = string.Empty;
+        public int CantidadMaximaAlumnos { get; set; } = 0;
+        public string NombreProfesor { get; set; } = string.Empty;
+    }
+}
