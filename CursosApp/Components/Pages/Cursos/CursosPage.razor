@@ -1,0 +1,136 @@
+﻿@page "/agregarCurso"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+@inject CursosAppContext context
+
+<h3>Agregar Curso</h3>
+
+@if (Data == null)
+{
+    <button type="button" class="btn btn-primary" @onclick="AgregarCurso">Agregar nuevo curso</button>
+}
+else
+{
+    <form>
+        <div class="mb-3">
+            <label for="recipient-nombre" class="col-form-label">Nombre:</label>
+            <input type="text" class="form-control" id="recipient-nombre" @bind="Data.Nombre">
+        </div>
+        <div class="mb-3">
+            <label for="message-cantidad" class="col-form-label">Cantidad maxima de alumnos:</label>
+            <input type="number" class="form-control" id="message-cantidad" @bind="Data.CantidadMaximaAlumnos"></input>
+        </div>
+        <div class="mb-3">
+            <label for="message-profesor" class="col-form-label">Profesor:</label>
+            @if (profesoresList != null)
+            {
+                <div class="mb-3">
+                    <InputSelect class="form-control" @bind-Value="Data.ProfesorPrincipal.ID" placeholder="Profesor" id="message-profesor">
+                        @foreach (var item in profesoresList)
+                        {
+                            <option value="@item.ID">@($"{item.Nombre} {item.Apellido}")</option>
+                        }
+                    </InputSelect>
+                </div>
+            }
+        </div>
+        <div class="mb-3">
+            @if (Data.AlumnosList.Count >= Data.CantidadMaximaAlumnos)
+            {
+                <h5>Cupo de alumnos completo</h5>
+            }
+            else
+            {
+                <label for="recipient-alumno" class="col-form-label">Alumno:</label>
+                <div class="mb-3">
+                    <InputSelect class="form-control" @bind-Value="alumnoAgregarID" placeholder="Alumno" id="message-alumno">
+                        @foreach (var item in alumnosList)
+                        {
+                            <option value="@item.ID">@($"{item.Nombre} {item.Apellido}")</option>
+                        }
+                    </InputSelect>
+                    <button type="button" class="btn btn-primary" @onclick="AgregarAlumno">Agregar alumno</button>
+                </div>
+
+            }
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            Nombre
+                        </th>
+                        <th>
+                            Apellido
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Data.AlumnosList)
+                    {
+                        <tr>
+                            <td>@item.Nombre</td>
+                            <td>@item.Apellido</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </form>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="Cancelar">Cancelar</button>
+        <button type="button" class="btn btn-primary" @onclick="GuardarCurso">Guardar</button>
+    </div>
+}
+
+@code {
+    private Curso? Data { get; set; }
+    private List<Profesor>? profesoresList { get; set; }
+    private List<Alumno>? alumnosList { get; set; }
+    private Guid alumnoAgregarID = Guid.NewGuid();
+
+    private void AgregarCurso()
+    {
+        Data = new();
+        profesoresList = context.Profesores.ToList();
+        profesoresList = profesoresList.OrderBy(p => p.Apellido).ToList();
+        alumnosList = context.Alumnos.ToList();
+        alumnosList = alumnosList.OrderBy(a => a.Apellido).ToList();
+    }
+
+    private void AgregarAlumno()
+    {
+        Alumno alumnoSeleccionado = alumnosList.First(a => a.ID == alumnoAgregarID);
+        Data.AlumnosList.Add(alumnoSeleccionado);
+        alumnoAgregarID = Guid.NewGuid();
+    }
+
+    private void Cancelar()
+    {
+        LimpiarDatos();
+    }
+
+    private void GuardarCurso()
+    {
+        if (Data.CantidadMaximaAlumnos < Data.AlumnosList.Count)
+        {
+            
+        }
+        else
+        {
+            Profesor profesorSeleccionado = profesoresList.First(p => p.ID == Data.ProfesorPrincipal.ID);
+            Data.ProfesorPrincipal = profesorSeleccionado;
+            context.Cursos.Add(Data);
+            context.SaveChanges();
+            LimpiarDatos();
+        }
+    }
+
+    private void LimpiarDatos()
+    {
+        Data = null;
+        profesoresList = null;
+        alumnosList = null;
+        alumnoAgregarID = Guid.NewGuid();
+    }
+}

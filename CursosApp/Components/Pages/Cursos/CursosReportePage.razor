@@ -36,6 +36,34 @@ else
                     <td>@item.CantidadMaximaAlumnos</td>
                     <td>@item.NombreProfesor</td>
                 </tr>
+                @if (item.Alumnos != null && item.Alumnos.Count > 0)
+                {
+                    <tr>
+                        <td colspan="3">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Nombre
+                                        </th>
+                                        <th>
+                                            Apellido
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var itemAlumno in item.Alumnos)
+                                    {
+                                        <tr>
+                                            <td>@itemAlumno.Nombre</td>
+                                            <td>@itemAlumno.Apellido</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                }
             }
         </tbody>
     </table>
@@ -50,48 +78,27 @@ else
     {
         if (filtroNombreProfesor != "")
         {
-            cursos = context.Cursos.Include("ProfesorPrincipal")
+            cursos = context.Cursos.Include("ProfesorPrincipal").Include("AlumnosList")
             .Where(c => c.ProfesorPrincipal.Nombre.Contains(filtroNombreProfesor) || c.ProfesorPrincipal.Apellido.Contains(filtroNombreProfesor))
             .Select(c => new CursoReporteModel()
                 {
                     Nombre = c.Nombre,
                     CantidadMaximaAlumnos = c.CantidadMaximaAlumnos,
-                    NombreProfesor = $"{c.ProfesorPrincipal.Nombre} {c.ProfesorPrincipal.Apellido}"
+                    NombreProfesor = $"{c.ProfesorPrincipal.Nombre} {c.ProfesorPrincipal.Apellido}",
+                    Alumnos = c.AlumnosList
                 }).ToList();
         }
         else
         {
-            cursos = context.Cursos.Include("ProfesorPrincipal")
+            cursos = context.Cursos.Include("ProfesorPrincipal").Include("AlumnosList")
             .Select(c => new CursoReporteModel()
                 {
                     Nombre = c.Nombre,
                     CantidadMaximaAlumnos = c.CantidadMaximaAlumnos,
-                    NombreProfesor = $"{c.ProfesorPrincipal.Nombre} {c.ProfesorPrincipal.Apellido}"
+                    NombreProfesor = $"{c.ProfesorPrincipal.Nombre} {c.ProfesorPrincipal.Apellido}",
+                    Alumnos = c.AlumnosList
                 }).ToList();
         }
-
-
-        // var comando = context.Cursos.Include("ProfesorPrincipal");
-        // if (filtroNombreProfesor != "")
-        // {
-        //     comando = comando.Where(c => c.ProfesorPrincipal.Nombre == filtroNombreProfesor || c.ProfesorPrincipal.Apellido == filtroNombreProfesor);
-        // }
-        // cursos = comando
-        // .Select(c => new CursoReporteModel()
-        //     {
-        //         Nombre = c.Nombre,
-        //         CantidadMaximaAlumnos = c.CantidadMaximaAlumnos,
-        //         NombreProfesor = $"{c.ProfesorPrincipal.Nombre} {c.ProfesorPrincipal.Apellido}"
-        //     }).ToList();
-
-
-        // cursos = (from c in context.Cursos.Include("ProfesorPrincipal")
-        //           select new CursoReporteModel()
-        //               {
-        //                   Nombre = c.Nombre,
-        //                   CantidadMaximaAlumnos = c.CantidadMaximaAlumnos,
-        //                   NombreProfesor = $"{c.ProfesorPrincipal.Nombre} {c.ProfesorPrincipal.Apellido}"
-        //               }).ToList();
     }
 
     private class CursoReporteModel
@@ -99,5 +106,6 @@ else
         public string Nombre { get; set; } = string.Empty;
         public int CantidadMaximaAlumnos { get; set; } = 0;
         public string NombreProfesor { get; set; } = string.Empty;
+        public List<Alumno>? Alumnos { get; set; }
     }
 }
