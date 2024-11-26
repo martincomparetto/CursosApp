@@ -2,8 +2,16 @@
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
 @inject CursosAppContext context
+@inject IJSRuntime js
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@inject ProtectedSessionStorage ProtectedSessionStore
 
 <h3>Agregar Curso</h3>
+
+<button type="button" @onclick="EjecutarJS">Ejecutar JS</button>
+<button type="button" @onclick="AddSessionStorage">Agregar Session Storage</button>
+<button type="button" @onclick="ShowSessionStorage">Mostrar Session Storage</button>
+<button type="button" @onclick="MostrarUltimoCursoGuardado">Mostrar ultimo curso guardado</button>
 
 @if (Data == null)
 {
@@ -114,7 +122,7 @@ else
     {
         if (Data.CantidadMaximaAlumnos < Data.AlumnosList.Count)
         {
-            
+
         }
         else
         {
@@ -122,6 +130,9 @@ else
             Data.ProfesorPrincipal = profesorSeleccionado;
             context.Cursos.Add(Data);
             context.SaveChanges();
+
+            ProtectedSessionStore.SetAsync("UltimoCursoGuardado", Data);
+
             LimpiarDatos();
         }
     }
@@ -132,5 +143,30 @@ else
         profesoresList = null;
         alumnosList = null;
         alumnoAgregarID = Guid.NewGuid();
+    }
+
+    private void EjecutarJS()
+    {
+        js.InvokeVoidAsync("alert", "Ejemplo JS"); 
+    }
+
+    private void AddSessionStorage()
+    {
+        ProtectedSessionStore.SetAsync("UserSessionUserID", 99);
+    }
+
+    private async void ShowSessionStorage()
+    {
+        var valor = await ProtectedSessionStore.GetAsync<int>("UserSessionUserID");
+        js.InvokeVoidAsync("alert", valor.Value.ToString());
+
+    }
+
+    private async void MostrarUltimoCursoGuardado()
+    {
+        var ultimoCurso = await ProtectedSessionStore.GetAsync<Curso>("UltimoCursoGuardado");
+        Curso? ultimoCursoValue = ultimoCurso.Value;
+        js.InvokeVoidAsync("alert", ultimoCursoValue.Nombre);
+
     }
 }
